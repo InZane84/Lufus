@@ -463,7 +463,7 @@ class Rufus(QMainWindow):
     
     def update_new_label(self, current_text):
         states.new_label = current_text
-        print(f"Stored in state: {states.new_label}")
+        # print(f"Stored in state: {states.new_label}")
     
     def update_cluster_size(self):
         states.cluster_size = self.combo_cluster.currentIndex()
