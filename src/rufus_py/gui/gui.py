@@ -8,11 +8,12 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QPushButton, QProgressBar, QCheckBox, 
                              QMessageBox, QDialog, QTextEdit, QFileDialog, 
                              QLineEdit, QFrame, QStatusBar, QToolButton, QSpacerItem)
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt6.QtGui import QFont
 
 from rufus_py.drives import states
 from rufus_py.drives import formatting as fo
+from rufus_py.writing.flash_usb import FlashUSB
 
 
 class LogWindow(QDialog):
@@ -40,6 +41,33 @@ class AboutWindow(QDialog):
         self.about_text.setStyleSheet("background-color: white; border: 1px solid #ccc;")
         layout.addWidget(self.about_text)
         self.setLayout(layout)
+
+class FlashWorker(QThread): # thi is so the ui dont freeze when flashing
+    finished = pyqtSignal(bool)
+    progress = pyqtSignal(str)
+    def __init__(self, iso_path: str, mount_path: str):
+        super().__init__()
+        self.iso_path = iso_path
+        self.mount_path = mount_path
+    def run(self):
+        try:
+            self.progress.emit("Unmounting drive...")
+            fo.unmount()
+            #update progress bar
+            self.progress.emit("Flashing ISO to device...")
+            result = FlashUSB(self.iso_path, self.mount_path)
+            #see above
+            if result:
+                self.progress.emit("Flashing complete!")
+            else:
+                self.progress.emit("Flash failed.")
+            #see above
+            self.finished.emit(result)
+            #yay it worked
+        except Exception as e:
+            self.progress.emit(f"Error: {str(e)}")
+            self.finished.emit(False)
+            #change progress bar 2: electric boogaloo
 
 class Rufus(QMainWindow):
     def __init__(self, usb_devices=None):
@@ -422,6 +450,7 @@ class Rufus(QMainWindow):
 
         self.btn_cancel = QPushButton("CANCEL")
         self.btn_cancel.setFixedSize(100, 50)
+        self.btn_cancel.clicked.connect(self.cancel_process)
         
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(10)
@@ -524,52 +553,59 @@ class Rufus(QMainWindow):
         self.btn_cancel.setEnabled(False)
         self.progress_bar.setValue(100)
         self.progress_bar.setFormat("READY FOR ACTION")
+    
+    def get_selected_mount_path(self) -> str:
+        text = self.combo_device.currentText()
+        if '(' in text and ')' in text:
+            return text.split('(')[1].split(')')[0].strip()
+        return ""
+    
     def cancel_process(self):
         reply = QMessageBox.question(self, "Cancel", "Are you sure you want to cancel?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
+            if hasattr(self, 'flash_worker') and self.flash_worker.isRunning():
+                self.flash_worker.terminate()
             self.progress_bar.setValue(0)
             self.progress_bar.setFormat("")
             self.btn_start.setEnabled(True)
             self.btn_cancel.setEnabled(False)
             self.statusBar.showMessage("Ready", 0)
-    def update_progress(self):
-        self.progress += 1
-        if self.progress > 100:
-            self.progress = 0
-        self.progress_bar.setValue(self.progress)
-        self.progress_bar.setFormat(f"Copying ISO files: {self.progress}.0%")
-        
-        if self.progress >= 100:
-            self.timer.stop()
-            self.btn_start.setEnabled(True)
-            self.btn_cancel.setEnabled(False)
-            self.statusBar.showMessage("Ready", 0)
+    
+    def on_flash_finished(self, success: bool):
+        #yayyyyyy
+        if success:
+            self.progress_bar.setValue(100)
+            self.progress_bar.setFormat("Complete! 100%")
+            QMessageBox.information(self, "Success", "USB drive flashed successfully!")
+        else:
+            self.progress_bar.setFormat("Failed")
+            QMessageBox.critical(self, "Error", "Failed to flash USB drive.") #uh oh
+        self.btn_start.setEnabled(True)
+        self.btn_cancel.setEnabled(False)
+        self.statusBar.showMessage("Ready", 0)
+
     
     def start_process(self):
+        #error handling woah so cool im such a good programmer, this will surely never fail
+        if not getattr(states, 'iso_path', '') or not Path(states.iso_path).exists():
+            QMessageBox.warning(self, "No Image", "Please select a valid installation file first.")
+            return
+        mount_path = self.get_selected_mount_path()
+        if not mount_path:
+            QMessageBox.warning(self, "No Device", "Please select a USB device first.")
+            return
+        
         self.btn_start.setEnabled(False)
         self.btn_cancel.setEnabled(True)
-        self.progress_bar.setValue(10)
-        self.progress_bar.setFormat("Starting.. 10%")
-        # unmount
-        fo.unmount()
-        self.progress_bar.setValue(30)
-        self.progress_bar.setFormat("Unmounted Drive.. 20%")
-        # we must either flash iso or format the drive
-        # logic will be implemented later
-        # dd flashing goes here
-
-        # format the drive
-        fo.dskformat()
-        self.progress_bar.setValue(60)
-        self.progress_bar.setFormat("Format Drive.. 60%")
-        # change label
-        fo.volumecustomlabel()
-        self.progress_bar.setValue(80)
-        self.progress_bar.setFormat("Changed Label.. 80%")
-        # re-mount
-        fo.remount()
-        self.progress_bar.setValue(100)
-        self.progress_bar.setFormat("Mount Done.. Completed! 100%")
+        self.progress_bar.setValue(0)
+        self.progress_bar.setFormat("Preparing...")
+        self.statusBar.showMessage("Flashing...", 0)
+        #progress bar:3c
+        self.flash_worker = FlashWorker(states.iso_path, mount_path)
+        self.flash_worker.progress.connect(lambda msg: self.statusBar.showMessage(msg, 0))
+        self.flash_worker.finished.connect(self.on_flash_finished)
+        self.flash_worker.start()
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
