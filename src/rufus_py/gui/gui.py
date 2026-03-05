@@ -42,7 +42,7 @@ class AboutWindow(QDialog):
         layout.addWidget(self.about_text)
         self.setLayout(layout)
 
-class FlashWorker(QThread): # thi is so the ui dont freeze when flashing
+class FlashWorker(QThread): # this is so the ui dont freeze when flashing
     finished = pyqtSignal(bool)
     progress = pyqtSignal(str)
     def __init__(self, iso_path: str, mount_path: str):
@@ -609,7 +609,7 @@ class Rufus(QMainWindow):
         #progress bar:3c
         self.flash_worker = FlashWorker(states.iso_path, mount_path)
         self.flash_worker.progress.connect(lambda msg: self.statusBar.showMessage(msg, 0))
-        self.flash_worker.finished.connect(self.on_flash_finished)
+        # self.flash_worker.finished.connect(self.on_flash_finished)
         self.flash_worker.start()
         
 
