@@ -103,12 +103,11 @@ class Notification(QFrame):
     def __init__(self, message, notification_type="info", duration=3000, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint |
-                            Qt.WindowType.Tool |
-                            Qt.WindowType.WindowStaysOnTopHint)
+                            Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         colors = {
-            'info': '#3498db',
-            'success': '#2ecc71',
+            'info': '#6e6e6e',
+            'success': '#5a5a5a',
         }
 
         layout = QVBoxLayout(self)
@@ -340,6 +339,7 @@ class lufus(QMainWindow):
         self.log_window = None
         self.about_window = None
         self.log_entries = []
+        self._last_clipboard = ""
 
         sys.stdout = StdoutRedirector(self.log_message)
 
@@ -347,6 +347,10 @@ class lufus(QMainWindow):
         self.init_ui()
         self.setAcceptDrops(True)
         self.notifier = NotificationManager(self)
+
+        self._clipboard_timer = QTimer(self)
+        self._clipboard_timer.timeout.connect(self._check_clipboard)
+        self._clipboard_timer.start(500)
 
         self.log_message("lufus started")
         self.log_message(f"Python {sys.version.split()[0]} | {platform.system()} {platform.release()} {platform.machine()}")
@@ -899,6 +903,22 @@ class lufus(QMainWindow):
         states.check_bad = 0 if self.chk_badblocks.isChecked() else 1
         self.combo_badblocks.setEnabled(self.chk_badblocks.isChecked())
         self.log_message(f"Bad block check: {'enabled' if self.chk_badblocks.isChecked() else 'disabled'}")
+
+    def _check_clipboard(self):
+        text = QApplication.clipboard().text().strip()
+        if text == self._last_clipboard:
+            return
+        self._last_clipboard = text
+        path = text.strip('"').strip("'")
+        if path.lower().endswith(".iso") and Path(path).is_file():
+            file_size = os.path.getsize(path)
+            states.iso_path = path
+            clean_name = path.split("/")[-1].split("\\")[-1]
+            self.combo_boot.setItemText(0, clean_name)
+            self.input_label.setText(clean_name.split('.')[0].upper())
+            self.log_message(f"Image loaded from clipboard: {path}")
+            self.log_message(f"Image size: {file_size:,} bytes ({file_size / (1024**3):.2f} GiB)")
+            self.notifier.show(f"✓ {clean_name} loaded from clipboard", notification_type='success', duration=3000)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
