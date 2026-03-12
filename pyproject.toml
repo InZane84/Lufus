@@ -10,7 +10,7 @@ author_email = "example@example.com"
 
 [tool.briefcase.app.lufus]
 formal_name = "Lufus"
-description = "A rufus clone written in py and designed to work with linux "
+description = "A rufus clone written in Python and designed to work with Linux."
 long_description = """Lufus is a physical drive imaging and formatting utility written in Python, inspired by Rufus, with the goal of delivering a greater experience for Linux users.
 """
 sources = [
@@ -87,7 +87,7 @@ system_runtime_requires = [
 manylinux = "manylinux_2_28"
 
 system_requires = [
-# ?? FIXME
+    #AppImage seemingly fails without this here so...
 ]
 
 linuxdeploy_plugins = [
@@ -113,3 +113,15 @@ supported = false
 [tool.briefcase.app.lufus.web]
 supported = false
 
+[project]
+name = "lufus"
+version = "0.1.0"
+description = "Physical drive imaging and formatting utility written in Python"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.13"
+dependencies = [
+    "psutil>=7.2.2",
+    "pyqt6>=6.10.2",
+    "pyudev>=0.24.4"
+]
