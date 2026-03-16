@@ -426,7 +426,7 @@ def winlocalacc():
         #creates temporary mount point for the windows iso
         subprocess.run(['mkdir', '/media/tempwinmnt'], check=True)
         #mounts the boot.wim file using wimlib
-        subprocess.run(['wimmountrw', f'{mount}/sources/boot.wm', '2', '/media/tempwinmnt'], check=True)
+        subprocess.run(['wimmountrw', f'{mount}/sources/boot.wim', '2', '/media/tempwinmnt'], check=True)
         #using chntpw to edit the registry file SOFTWARE and then also run the commands using stdin
         subprocess.run(['chntpw', 'e', '/media/tempwinmnt/Windows/System32/config/SOFTWARE'],  input=commands, text=True, capture_output=True, check=True)
         subprocess.run(['wimunmount', '/media/tempwinmnt', '--commit'], check=True)
