@@ -121,20 +121,19 @@ pyinstaller "$MAIN_SCRIPT" \
     --add-data "$GUI_DIR/assets:assets" \
     --noconfirm
 
-# ---------- Verify bundle ----------
-echo "=== Bundle Contents (first 3 levels) ==="
-if [ -d "dist/lufus" ]; then
-    if command -v tree &> /dev/null; then
-        tree -L 3 dist/lufus/
-    else
-        print_tree dist/lufus/ 3
-    fi
-else
-    echo "❌ dist/lufus/ directory not found!"
-    ls -la dist/
-    exit 1
-fi
-echo "========================================"
+# ===== DEBUG: Show bundle structure =====
+#echo "=== Bundle Contents ==="
+#if command -v tree &> /dev/null; then
+#    tree -L 4 dist/lufus/
+#else
+#    echo "dist/lufus/ top level:"
+#    ls -la dist/lufus/
+#    echo "dist/lufus/_internal/ :"
+#    ls -la dist/lufus/_internal/
+#    echo "Searching for lufus modules:"
+#    find dist/lufus -name "*.pyc" | head -20
+#fi
+#echo "========================"
 
 # Locate gui module
 GUI_LOCATION=$(find dist/lufus -type d -name "gui" 2>/dev/null | head -1)
