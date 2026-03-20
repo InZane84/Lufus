@@ -91,3 +91,19 @@ about_content,lufus — це інструмент запису образів д
 Натхненний оригінальним інструментом lufus для Windows.
 Версія: 1.0.0
 GitHub: github.com/hog185/lufus
+about_subtitle,Інструмент запису USB
+btn_close,Закрити
+btn_ok,OK
+combo_boot_default,installation_media.iso
+tooltip_website,Вебсайт
+settings_label_theme,Тема
+input_hash_placeholder,Введіть очікуваний хеш SHA256 тут...
+combo_badblocks_2pass,2 проходи
+combo_badblocks_3pass,3 проходи
+status_unmounting_all,Демонтування всіх розділів на {device}...
+status_unmounting,Демонтування {part}...
+status_format_starting,Запуск операції форматування...
+status_format_in_progress,Форматування диска...
+status_format_complete,Форматування завершено!
+status_format_failed,Форматування НЕ ВДАЛОСЯ. Перевірте журнал вище для точної помилки.
+status_flash_error,Помилка запису: {error}

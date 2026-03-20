@@ -89,3 +89,19 @@ Version: 1.0.0
 GitHub: github.com/hog185/lufus"
 
 #s1oplus was here meow :3
+about_subtitle,Ferramenta de Flash USB
+btn_close,Fechar
+btn_ok,OK
+combo_boot_default,installation_media.iso
+tooltip_website,Site
+settings_label_theme,Tema
+input_hash_placeholder,Digite o hash SHA256 esperado aqui...
+combo_badblocks_2pass,2 ciclos
+combo_badblocks_3pass,3 ciclos
+status_unmounting_all,Desmontando todas as partições em {device}...
+status_unmounting,Desmontando {part}...
+status_format_starting,Iniciando operação de formatação...
+status_format_in_progress,Formatando disco...
+status_format_complete,Formatação concluída!
+status_format_failed,Formatação FALHOU. Verifique o log acima para o erro exato.
+status_flash_error,Erro de gravação: {error}

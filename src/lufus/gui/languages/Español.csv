@@ -92,3 +92,16 @@ combo_badblocks_2pass,2 pasadas
 combo_badblocks_3pass,3 pasadas
 chk_verify_hash,Verificar suma SHA256
 input_hash_placeholder,Ingresa el hash SHA256 esperado aquí...
+about_subtitle,Herramienta de flash USB
+btn_close,Cerrar
+btn_ok,OK
+combo_boot_default,installation_media.iso
+tooltip_website,Sitio web
+settings_label_theme,Tema
+status_unmounting_all,Desmontando todas las particiones en {device}...
+status_unmounting,Desmontando {part}...
+status_format_starting,Iniciando operación de formateo...
+status_format_in_progress,Formateando disco...
+status_format_complete,¡Formateo completado!
+status_format_failed,Formateo FALLIDO. Comprueba el registro anterior para ver el error exacto.
+status_flash_error,Error de flasheo: {error}

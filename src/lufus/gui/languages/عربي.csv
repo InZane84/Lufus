@@ -92,3 +92,19 @@ about_content,"لوفس (lufus) هو برنامج مصنوع بلغة بايثو
 مستوحى من برنامج روفس (rufus) الأصلي لنظام تشغيل ويندوز.
 الإصدار: 1.0.0
 GitHub: github.com/hog185/lufus"
+about_subtitle,أداة USB Flash
+btn_close,إغلاق
+btn_ok,OK
+combo_boot_default,installation_media.iso
+tooltip_website,الموقع
+settings_label_theme,السمة
+input_hash_placeholder,أدخل بصمة SHA256 المتوقعة هنا...
+combo_badblocks_2pass,دورتان
+combo_badblocks_3pass,ثلاث دورات
+status_unmounting_all,جارٍ فصل جميع الأقسام على {device}...
+status_unmounting,جارٍ فصل {part}...
+status_format_starting,جارٍ بدء عملية المحي...
+status_format_in_progress,جارٍ محو وتهيئة القرص...
+status_format_complete,!اكتملت عملية المحي
+status_format_failed,فشلت عملية المحي. راجع السجل أعلاه للاطلاع على الخطأ بالتفصيل.
+status_flash_error,خطأ في الحرق: {error}

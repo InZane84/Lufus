@@ -341,7 +341,7 @@ class SettingsDialog(QDialog):
 
         layout.addStretch()
         # ok button to apply canges :3
-        btn_ok = QPushButton("OK")
+        btn_ok = QPushButton(self._T.get("btn_ok", "OK"))
         btn_ok.clicked.connect(self._on_ok_clicked)
         layout.addWidget(btn_ok)
         self.setLayout(layout)
@@ -349,7 +349,7 @@ class SettingsDialog(QDialog):
     def _on_ok_clicked(self):
         # emit signals when settings are changed :D
         language = self.combo_language.currentText()
-        if language != "No languages found":
+        if language != self._T.get("settings_no_languages", "No languages found"):
             self.language_changed.emit(language)
         theme = self.combo_theme.currentText()
         if not theme.startswith("──"):
@@ -409,10 +409,11 @@ class FlashWorker(QThread):
     status = pyqtSignal(str)
     flash_done = pyqtSignal(bool)
 
-    def __init__(self, options: dict):
+    def __init__(self, options: dict, t: dict):
         super().__init__()
         # store options for flashing
         self.options = options
+        self._T = t
 
     def run(self):
         # run flash operation in background thread
@@ -435,25 +436,25 @@ class FlashWorker(QThread):
             image_option = options["image_option"]
 
             # unmount all partitions before flashing :D
-            self.status.emit(f"Unmounting all partitions on {device_node}...")
+            self.status.emit(self._T.get("status_unmounting_all", "Unmounting all partitions on {device}...").format(device=device_node))
             partitions = glob.glob(f"{device_node}*")
             for part in partitions:
                 if part != device_node:  # don't unmount the device itself
-                    self.status.emit(f"Unmounting {part}...")
+                    self.status.emit(self._T.get("status_unmounting", "Unmounting {part}...").format(part=part))
                     fo.unmount(part)
 
             # perform operation based on image option
             if image_option == 3:  # Format Only
-                self.status.emit("Starting format operation...")
+                self.status.emit(self._T.get("status_format_starting", "Starting format operation..."))
                 self.progress.emit(10)
-                self.status.emit("Formatting drive...")
+                self.status.emit(self._T.get("status_format_in_progress", "Formatting drive..."))
                 self.progress.emit(50)
                 success = fo.dskformat(status_cb=self.status.emit)
                 if success:
                     self.progress.emit(100)
-                    self.status.emit("Format complete!")
+                    self.status.emit(self._T.get("status_format_complete", "Format complete!"))
                 else:
-                    self.status.emit("Format FAILED. Check the log above for the exact error.")
+                    self.status.emit(self._T.get("status_format_failed", "Format FAILED. Check the log above for the exact error."))
 
             elif image_option == 0:  # Windows
                 if flash_mode == 0:
@@ -471,7 +472,7 @@ class FlashWorker(QThread):
 
             self.flash_done.emit(bool(success))
         except Exception as e:
-            self.status.emit(f"Flash error: {e}")
+            self.status.emit(self._T.get("status_flash_error", "Flash error: {error}").format(error=e))
             self.flash_done.emit(False)
         finally:
             # restore stdout :D
@@ -672,7 +673,7 @@ class lufus(QMainWindow):
         )
         layout.addWidget(label)
         layout.addWidget(line, 1)
-        return layout
+        return layout, label
 
     def update_usb_list(self, devices: dict):
         # update device dropdown with current usb devices
@@ -720,9 +721,8 @@ class lufus(QMainWindow):
         outer_layout.addWidget(scroll)
 
         # drive properties section :3
-        main_layout.addLayout(
-            self.create_header(self._T.get("header_drive_properties", "Drive Properties"))
-        )
+        _hdr_drive, self.lbl_header_drive = self.create_header(self._T.get("header_drive_properties", "Drive Properties"))
+        main_layout.addLayout(_hdr_drive)
         main_layout.addSpacing(S.px(4))
 
         # device selector with refresh button
@@ -809,9 +809,8 @@ class lufus(QMainWindow):
         main_layout.addSpacing(S.px(6))
 
         # format options section :3
-        main_layout.addLayout(
-            self.create_header(self._T.get("header_format_options", "Format Options"))
-        )
+        _hdr_fmt, self.lbl_header_format = self.create_header(self._T.get("header_format_options", "Format Options"))
+        main_layout.addLayout(_hdr_fmt)
         main_layout.addSpacing(S.px(4))
 
         # volume label input field
@@ -907,9 +906,8 @@ class lufus(QMainWindow):
         main_layout.addSpacing(S.px(6))
 
         # status section with progress bar :D
-        main_layout.addLayout(
-            self.create_header(self._T.get("header_status", "Status"))
-        )
+        _hdr_status, self.lbl_header_status = self.create_header(self._T.get("header_status", "Status"))
+        main_layout.addLayout(_hdr_status)
         main_layout.addSpacing(S.px(4))
 
         self.progress_bar = QProgressBar()
@@ -1347,6 +1345,9 @@ class lufus(QMainWindow):
     def _update_ui_text(self):
         # update all text labels with new translations :3
         self.setWindowTitle(self._T.get("window_title", "lufus"))
+        self.lbl_header_drive.setText(self._T.get("header_drive_properties", "Drive Properties"))
+        self.lbl_header_format.setText(self._T.get("header_format_options", "Format Options"))
+        self.lbl_header_status.setText(self._T.get("header_status", "Status"))
         self.lbl_device.setText(self._T.get("lbl_device", "Device"))
         self.lbl_boot.setText(self._T.get("lbl_boot_selection", "Boot Selection"))
         self.btn_select.setText(self._T.get("btn_select", "Select"))
@@ -1603,7 +1604,7 @@ class lufus(QMainWindow):
         else:
             # already root start flash worker :D
             self.log_message(f"Starting flash thread: image_option={options['image_option']}, flash_mode={options['currentflash']}, device={options['device']}")
-            self.flash_worker = FlashWorker(options)
+            self.flash_worker = FlashWorker(options, self._T)
             self.flash_worker.progress.connect(self.progress_bar.setValue, Qt.ConnectionType.QueuedConnection)
             self.flash_worker.status.connect(self._on_flash_status, Qt.ConnectionType.QueuedConnection)
             self.flash_worker.flash_done.connect(self.on_flash_finished, Qt.ConnectionType.QueuedConnection)
@@ -1633,7 +1634,7 @@ class lufus(QMainWindow):
     def _start_flash_with_options(self, options: dict) -> None:
         # start flashworker directly with prebuilt options dict :3
         self.log_message(f"Starting flash: image_option={options['image_option']}, flash_mode={options['currentflash']}, device={options['device']}")
-        self.flash_worker = FlashWorker(options)
+        self.flash_worker = FlashWorker(options, self._T)
         self.flash_worker.progress.connect(self.progress_bar.setValue, Qt.ConnectionType.QueuedConnection)
         self.flash_worker.status.connect(self._on_flash_status, Qt.ConnectionType.QueuedConnection)
         self.flash_worker.flash_done.connect(self.on_flash_finished, Qt.ConnectionType.QueuedConnection)

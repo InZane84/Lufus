@@ -92,3 +92,19 @@ about_content,"Lufus is a disk image writer written in Python for Linux.
 Inspired by the original Rufus tool for Windows.
 Version: 1.0.0
 GitHub: github.com/hog185/lufus"
+about_subtitle,USB Flash Tool
+btn_close,Close
+btn_ok,OK
+combo_boot_default,installation_media.iso
+tooltip_website,Website
+settings_label_theme,Theme
+input_hash_placeholder,Enter expected SHA256 hash here...
+combo_badblocks_2pass,2 Pass
+combo_badblocks_3pass,3 Pass
+status_unmounting_all,Unmounting all partitions on {device}...
+status_unmounting,Unmounting {part}...
+status_format_starting,Starting format operation...
+status_format_in_progress,Formatting drive...
+status_format_complete,Format complete!
+status_format_failed,Format FAILED. Check the log above for the exact error.
+status_flash_error,Flash error: {error}

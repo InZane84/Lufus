@@ -92,3 +92,19 @@ about_content,"lufus ist ein in Python geschriebener USB-Image-Writer für Linux
 Inspiriert vom originalen lufus-Tool für Windows.
 Version: 1.0.0
 GitHub: github.com/hog185/lufus"
+about_subtitle,USB-Flash-Tool
+btn_close,Schließen
+btn_ok,OK
+combo_boot_default,installation_media.iso
+tooltip_website,Webseite
+settings_label_theme,Design
+input_hash_placeholder,Erwarteten SHA256-Hash hier eingeben...
+combo_badblocks_2pass,2 Durchgänge
+combo_badblocks_3pass,3 Durchgänge
+status_unmounting_all,Alle Partitionen auf {device} werden ausgehängt...
+status_unmounting,{part} wird ausgehängt...
+status_format_starting,Formatierungsvorgang wird gestartet...
+status_format_in_progress,Laufwerk wird formatiert...
+status_format_complete,Formatierung abgeschlossen!
+status_format_failed,Formatierung FEHLGESCHLAGEN. Prüfen Sie das obige Protokoll für den genauen Fehler.
+status_flash_error,Flash-Fehler: {error}
